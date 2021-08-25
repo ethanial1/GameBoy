@@ -65,8 +65,9 @@ GamePlayManager = {
             // evitar que los diamantes se sobrepongan
             this.diamonds[i] = diamond;
             var rectanguloCurrent = this.getBoundsDiamonds(diamond);
+            var rectaHorse = this.getBoundsDiamonds(this.horse);
 
-            while(this.isOverlapingOtherDiamond(i, rectanguloCurrent)){
+            while(this.isOverlapingOtherDiamond(i, rectanguloCurrent) || this.isRectangleOverlapping(rectaHorse, rectanguloCurrent)){
                 diamond.x = game.rnd.integerInRange(50, 1050);
                 diamond.y = game.rnd.integerInRange(50, 600);
                 rectanguloCurrent = this.getBoundsDiamonds(diamond);
@@ -100,6 +101,15 @@ GamePlayManager = {
         } 
         return false;
     },
+    getBoundsHourse: function () {
+        // utilizamos las coordenadas de nuestro sprite, nos aseguramos de que width no se negativo usando math.abs
+        var x0 = this.horse.x - Math.abs(this.horse.width) / 4;
+        var width = Math.abs(this.horse.width) / 2;
+        var y0 = this.horse.y - this.horse.height / 2;
+        var height = this.horse.height;
+
+        return new Phaser.Rectangle(x0, y0, width, height);
+    },
     // Phaser llama frame a frame al método update
     update: function () {
 
@@ -127,6 +137,19 @@ GamePlayManager = {
             // le sumamos un porcentaje de la distancia.
             this.horse.x += distaX * 0.12; // podemos modificar el porcentaje y este altera la velocidad
             this.horse.y += distaY * 0.12;
+
+            // colisiones
+            // iteramos sobre todos los diamantes en pantalla
+            for (var i = 0; i < cantidad_diamantes; i++){
+                // recuperar el rectángulo del caballo y del diamante, verificar si están colisionando
+                var rectHorse = this.getBoundsHourse();
+                var rectDiamond = this.getBoundsDiamonds(this.diamonds[i]);
+
+                if(this.diamonds[i].visible && this.isRectangleOverlapping(rectHorse, rectDiamond)){
+                    this.diamonds[i].visible = false;
+                }
+
+            }
         }
 
     }
