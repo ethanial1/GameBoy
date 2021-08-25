@@ -1,3 +1,4 @@
+var cantidad_diamantes = 20;
 // Objeto
 GamePlayManager = {
     // phaser llama a init una vez que declaremos el estado start
@@ -16,8 +17,11 @@ GamePlayManager = {
         // cargamos el fondo con load.image(nombreDeInstancia, rutaDeImagen);
         game.load.image('background', 'assets/images/background.png');
 
-        // Sprites (identificado, ruta, ancho, alto, númerDeImágenes)
-        game.load.spritesheet('horse', 'assets/images/horse.png', 84,156,2)
+        // Sprites: caballo (identificado, ruta, ancho, alto, númerDeImágenes)
+        game.load.spritesheet('horse', 'assets/images/horse.png', 84,156,2);
+
+        // Diamantes
+        game.load.spritesheet('diamonds', 'assets/images/diamonds.png', 81, 84, 4);
     },
 
     create: function () {
@@ -47,9 +51,54 @@ GamePlayManager = {
 
         // Capturamos el primer click del mouse
         game.input.onDown.add(this.onTap, this);
+
+        // Ponemos en pantalla los diamantes
+        this.diamonds = [];
+        for (var i = 0; i < cantidad_diamantes; i++){
+            var diamond = game.add.sprite(100,100, 'diamonds');
+            diamond.frame = game.rnd.integerInRange(0,3); // seleccionamos un frame al azar.
+            diamond.scale.setTo(0.30 + game.rnd.frac()); // game.rnd.frac() regresa números de 0 -1
+            diamond.anchor.setTo(0.5);
+            diamond.x = game.rnd.integerInRange(50, 1050);
+            diamond.y = game.rnd.integerInRange(50, 600);
+
+            // evitar que los diamantes se sobrepongan
+            this.diamonds[i] = diamond;
+            var rectanguloCurrent = this.getBoundsDiamonds(diamond);
+
+            while(this.isOverlapingOtherDiamond(i, rectanguloCurrent)){
+                diamond.x = game.rnd.integerInRange(50, 1050);
+                diamond.y = game.rnd.integerInRange(50, 600);
+                rectanguloCurrent = this.getBoundsDiamonds(diamond);
+            }
+
+        }
     },
     onTap: function () {
         this.flagFirstMouseDown = true;
+    },
+    getBoundsDiamonds: function (diamondSprit) {
+        return new Phaser.Rectangle(diamondSprit.left, diamondSprit.top, diamondSprit.width, diamondSprit.height);
+    },
+    isRectangleOverlapping: function (recta1, recta2) {
+        if (recta1.x > recta2.x + recta2.width || recta2.x > recta1.x + recta1.width){
+            return false;
+        }
+        if(recta1.y > recta2.y + recta2.height || recta2.y > recta1.y + recta1.height) {
+            return false;
+        }
+        return true;
+    },
+    // recibe el diamante creado y su rectángulo
+    isOverlapingOtherDiamond: function (index, recta2) {
+        // recorremos todos los diamantes anteriores ya creados 
+        for (var i = 0; i < index; i++){
+            var recta1 = this.getBoundsDiamonds(this.diamonds[i]);
+            if(this.isRectangleOverlapping(recta1, recta2)){
+                return true;
+            }
+        } 
+        return false;
     },
     // Phaser llama frame a frame al método update
     update: function () {
