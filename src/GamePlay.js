@@ -7,6 +7,9 @@ GamePlayManager = {
         // Alinear el juego de forma horizontal y vertical en el centro de la pantall
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
+
+        // Nos ayuda para que una vez iniciado el juego, el caballo no se mueva.
+        this.flagFirstMouseDown = false;
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
     preload: function () {
@@ -34,17 +37,49 @@ GamePlayManager = {
         this.horse.anchor.setTo(0.5,0.5); // x,y
 
         // Rotar
-        this.horse.angle = 15; // en grados a partir de su anchor
+        //this.horse.angle = 15; // en grados a partir de su anchor
 
         // Escalado
-        this.horse.scale.setTo(2); // puede escalarse en x,y o solo en uno y lo hace en proporción.
+        //this.horse.scale.setTo(2); // puede escalarse en x,y o solo en uno y lo hace en proporción.
 
         // Opacidad / alpha
-        this.horse.alpha = 1; // de 0 - 1, 0: invisible 1: totalmente visible
+        //this.horse.alpha = 1; // de 0 - 1, 0: invisible 1: totalmente visible
+
+        // Capturamos el primer click del mouse
+        game.input.onDown.add(this.onTap, this);
+    },
+    onTap: function () {
+        this.flagFirstMouseDown = true;
     },
     // Phaser llama frame a frame al método update
     update: function () {
-        
+
+        // Evaluamos si la bandera es verdad
+        if(this.flagFirstMouseDown){
+            // guardamos las coordenadas donde se encuentra nuestro mouse
+            var pointX = game.input.x;
+            var pointY = game.input.y;
+
+            // calculamos la distancia que hay desde nuestro mouse y nuestro caballo y lo vamos a guardar
+            var distaX = pointX - this.horse.x;
+            var distaY = pointY - this.horse.y;
+
+            // Orientamos a nuestro caballo en base a la dirección del mouse
+            // lo podemos hacer sabiendo si la coordenada de nuestro mouse es mayor a la del caballo o es menor.
+            if(distaX > 0) { // está a la derecha
+                // invertimos la dirección con ayuda de la escala
+                this.horse.scale.setTo(1,1);
+            }else{ // está a la izquierdad
+                //                      x,y
+                this.horse.scale.setTo(-1,1);
+            }
+
+            // Movemos al caballo en base al mouse
+            // le sumamos un porcentaje de la distancia.
+            this.horse.x += distaX * 0.12; // podemos modificar el porcentaje y este altera la velocidad
+            this.horse.y += distaY * 0.12;
+        }
+
     }
 }
 
