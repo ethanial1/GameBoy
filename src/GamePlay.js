@@ -4,7 +4,9 @@ GamePlayManager = {
     init: function() {
         // Escalamos la pantalla
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        
+        // Alinear el juego de forma horizontal y vertical en el centro de la pantall
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
     preload: function () {
