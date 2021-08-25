@@ -35,6 +35,12 @@ GamePlayManager = {
 
         // Rotar
         this.horse.angle = 15; // en grados a partir de su anchor
+
+        // Escalado
+        this.horse.scale.setTo(2); // puede escalarse en x,y o solo en uno y lo hace en proporción.
+
+        // Opacidad / alpha
+        this.horse.alpha = 1; // de 0 - 1, 0: invisible 1: totalmente visible
     },
     // Phaser llama frame a frame al método update
     update: function () {
