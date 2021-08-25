@@ -2,6 +2,8 @@
 GamePlayManager = {
     // phaser llama a init una vez que declaremos el estado start
     init: function() {
+        // Escalamos la pantalla
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
