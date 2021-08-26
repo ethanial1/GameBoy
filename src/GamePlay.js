@@ -14,6 +14,8 @@ GamePlayManager = {
 
         // variable que guarda todos los diamantes que vamos agarrando
         this.amountDiamondsCaptu = 0;
+
+        this.endGame = false;
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
     preload: function () {
@@ -141,6 +143,7 @@ GamePlayManager = {
         this.amountDiamondsCaptu += 1; // cada que agarramos un diamante sumamos 1
 
         if(this.amountDiamondsCaptu >= cantidad_diamantes){
+            this.endGame = true;
             this.showFinalMessage('!Ganaste¡');
         }
     },
@@ -200,7 +203,7 @@ GamePlayManager = {
     update: function () {
 
         // Evaluamos si la bandera es verdad
-        if(this.flagFirstMouseDown){
+        if(this.flagFirstMouseDown && !this.endGame){
             // guardamos las coordenadas donde se encuentra nuestro mouse
             var pointX = game.input.x;
             var pointY = game.input.y;
