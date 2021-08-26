@@ -118,7 +118,22 @@ GamePlayManager = {
             //this.explo.visible = false;
             this.explo.kill(); // lo hace invisible y lo deja disponible
         }
+
+        // Texto
+        var style = {
+            font: 'bold 30pt Arial',
+            fill: '#ffff',
+            align: 'center'
+        }
+        this.currentScore = 0;
+        //                  x,      y,  texto, style
+        this.scoreTxt = game.add.text(game.width / 2, 40, '0', style);
         
+    },
+    // se llama cuando atrapamos un diamante
+    incrementCurrentScore: function () {
+        this.currentScore += 100;
+        this.scoreTxt.text = this.currentScore; // actualizamos el texto con el puntaje actual
     },
     onTap: function () {
         this.flagFirstMouseDown = true;
@@ -193,6 +208,7 @@ GamePlayManager = {
                 // La colición solo se hace con los diamantes visibles
                 if(this.diamonds[i].visible && this.isRectangleOverlapping(rectHorse, rectDiamond)){
                     this.diamonds[i].visible = false;
+                    this.incrementCurrentScore();
 
                     var explotion = this.explosionGroup.getFirstDead();
 
