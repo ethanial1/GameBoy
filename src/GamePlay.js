@@ -78,35 +78,47 @@ GamePlayManager = {
 
         }
 
+        // Grupos
+        this.explosionGroup = game.add.group();
+
+        // Pedir un sprite dentro de un grupo
+        //var newExplotion = this.explosionGroup.getFirtDead();
+
         // Animaciones con Tweenings
-        this.explo = game.add.sprite(100,100, 'explo');
-        this.explo.tweenScale = game.add.tween(this.explo.scale).to(
-            {
-                x: [0.4, 0.8, 0.4],         // arranca, ir, final
-                y: [0.4, 0.8, 0.4]
-            },
-            600,                            // Duración en milisegundos
-            Phaser.Easing.Exponential.Out,  //
-            false,                          // indicamos false para evitar que arranque automaticamente
-            0,                              // delay
-            0,                              // Cuántas veces se repite
-            false                           // Valla y regrese
-        );
+        this.explo = this.explosionGroup.create(100,100, 'explo');
 
-        this.explo.tweenAlpha = game.add.tween(this.explo).to(
-            {
-                alpha: [1, 0.6, 0]
-            },
-            600,
-            Phaser.Easing.Exponential.Out,
-            false,
-            0,
-            0,
-            false
-        );
-
-        this.explo.anchor.setTo(0.5);
-        this.explo.visible = false;
+        // creamos 10 elementos
+        for(var i = 0; i < 10; i++){
+            this.explo.tweenScale = game.add.tween(this.explo.scale).to(
+                {
+                    x: [0.4, 0.8, 0.4],         // arranca, ir, final
+                    y: [0.4, 0.8, 0.4]
+                },
+                600,                            // Duración en milisegundos
+                Phaser.Easing.Exponential.Out,  //
+                false,                          // indicamos false para evitar que arranque automaticamente
+                0,                              // delay
+                0,                              // Cuántas veces se repite
+                false                           // Valla y regrese
+            );
+    
+            this.explo.tweenAlpha = game.add.tween(this.explo).to(
+                {
+                    alpha: [1, 0.6, 0]
+                },
+                600,
+                Phaser.Easing.Exponential.Out,
+                false,
+                0,
+                0,
+                false
+            );
+    
+            this.explo.anchor.setTo(0.5);
+            //this.explo.visible = false;
+            this.explo.kill(); // lo hace invisible y lo deja disponible
+        }
+        
     },
     onTap: function () {
         this.flagFirstMouseDown = true;
@@ -181,13 +193,22 @@ GamePlayManager = {
                 // La colición solo se hace con los diamantes visibles
                 if(this.diamonds[i].visible && this.isRectangleOverlapping(rectHorse, rectDiamond)){
                     this.diamonds[i].visible = false;
-                    this.explo.visible = true; // hacemos visible la explosión
-                    this.explo.x = this.diamonds[i].x; // posicionamos en la misma posición del diamante
-                    this.explo.y = this.diamonds[i].y;
+
+                    var explotion = this.explosionGroup.getFirstDead();
+
+                    explotion.reset(this.diamonds[i].x,this.diamonds[i].y); // cuando un elemento está muerto, para activarlo hacemos un reset
+                    //explotion.visible = true;            // hacemos visible la explosión
+                    //explotion.x = this.diamonds[i].x;   // posicionamos en la misma posición del diamante
+                    //explotion.y = this.diamonds[i].y;
 
                     // ejecutamos las animaciones
-                    this.explo.tweenScale.start();
-                    this.explo.tweenAlpha.start();
+                    explotion.tweenScale.start();
+                    explotion.tweenAlpha.start();
+
+                    // Una vez terminada la animación, destruimos el objeto y vuelve a estar disponible.
+                    explotion.tweenAlpha.onComplete.add(function (currentTarget, currentTween){
+                        currentTarget.kill(); // solo matamos a uno, debido a que basta con eso
+                    }, this);
                 }
 
             }
