@@ -1,4 +1,5 @@
 var cantidad_diamantes = 20;
+var cantidad_boobles = 30;
 // Objeto
 GamePlayManager = {
     // phaser llama a init una vez que declaremos el estado start
@@ -16,6 +17,8 @@ GamePlayManager = {
         this.amountDiamondsCaptu = 0;
 
         this.endGame = false;
+
+        this.countSmile = -1;
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
     preload: function () {
@@ -30,6 +33,20 @@ GamePlayManager = {
 
         // Explosión
         game.load.spritesheet('explo', 'assets/images/explosion.png');
+
+        // Tiburon
+        game.load.spritesheet('shark', 'assets/images/shark.png');
+
+        // pescaditos
+        game.load.spritesheet('fishes','assets/images/fishes.png');
+
+        // Mollusk
+        game.load.spritesheet('mollusk', 'assets/images/mollusk.png');
+
+        // Burbujas
+        game.load.spritesheet('booble1', 'assets/images/booble1.png');
+        game.load.spritesheet('booble2', 'assets/images/booble2.png');
+
     },
 
     create: function () {
@@ -37,9 +54,31 @@ GamePlayManager = {
         // ponemos la imagen en pantalla con add.sprite(coordenadas, coordenadas, imagen )
         game.add.sprite(0, 0,'background');
 
+        // Boobles
+        this.boobleArray = [];
+        for(var i = 0; i < cantidad_boobles; i++){
+            var xBooble = game.rnd.integerInRange(1,1240);
+            var yBooble = game.rnd.integerInRange(600,950);
+
+            var booble = game.add.sprite(xBooble, yBooble, 'booble'+ game.rnd.integerInRange(1,2))
+            booble.vel = 0.2 + game.rnd.frac() * 2;
+            booble.alpha = 0.9;
+            booble.scale.setTo(0.2 + game.rnd.frac());
+            this.boobleArray[i] = booble;
+        }
+
+        // Mollusk
+        this.mollusk = game.add.sprite(500, 150, 'mollusk');
+
+        // Tiburon
+        this.shark = game.add.sprite(500,20, 'shark');
+
+        // Fishes
+        this.fishes = game.add.sprite(100, 550, 'fishes');
+
         // Sprites
         // añadimos propiedades
-        this.horse = game.add.sprite(0,0, 'horse');
+        this.horse = game.add.sprite(50,0, 'horse');
         this.horse.frame = 1; // ojo cerrado: 0, ojo abierto: 1, (Son solo dos frames)
         // cambiamos la posición de x,y
         this.horse.x = game.width / 2;
@@ -136,7 +175,7 @@ GamePlayManager = {
         this.scoreTxt.anchor.setTo(0.5);
 
         // Timer
-        this.totalTime = 5;
+        this.totalTime = 30;
         this.timerTxt = game.add.text(1000, 40, this.totalTime+'s', style);
         this.timerTxt.anchor.setTo(0.5);
 
@@ -155,6 +194,8 @@ GamePlayManager = {
     },
     // se llama cuando atrapamos un diamante
     incrementCurrentScore: function () {
+        this.countSmile = 0;
+        this.horse.frame = 1;
         this.currentScore += 100;
         this.scoreTxt.text = this.currentScore; // actualizamos el texto con el puntaje actual
         
@@ -167,6 +208,7 @@ GamePlayManager = {
         }
     },
     showFinalMessage: function (msg) {
+        this.tweenMollusk.stop();
         var bgAlpha = game.add.bitmapData(game.width, game.height); 
         bgAlpha.ctx.fillStyle = '#000000';
         bgAlpha.ctx.fillRect(0,0, game.width, game.height);
@@ -184,6 +226,11 @@ GamePlayManager = {
         this.textFieldFinalMessage.anchor.setTo(0.5);
     },
     onTap: function () {
+        if(!this.flagFirstMouseDown){
+            this.tweenMollusk = game.add.tween(this.mollusk.position).to(
+                {y: -0.001}, 5800, Phaser.Easing.Cubic.InOut, true, 0, 1000, true
+            ).loop(true);
+        }
         this.flagFirstMouseDown = true;
     },
     getBoundsDiamonds: function (diamondSprit) {
@@ -223,6 +270,40 @@ GamePlayManager = {
 
         // Evaluamos si la bandera es verdad
         if(this.flagFirstMouseDown && !this.endGame){
+
+            // Booble
+            for (var i = 0; i < cantidad_boobles; i++){
+                var booble = this.boobleArray[i];
+                booble.y -= booble.vel;
+
+                // Si llega al limite, aparecer abajo de la pantalla
+                if(booble.y < -50){
+                    booble.y = 700;
+                    booble.x = game.rnd.integerInRange(1, 1140);
+                }
+            }
+
+            // animamos al tuburon, restando 1 en x
+            this.shark.x--;
+            if(this.shark.x < -300){
+                this.shark.x = 1300;
+            }
+            // Cambiamos el frame del caballo
+            if(this.countSmile >= 0){
+                this.countSmile++;
+                if(this.countSmile > 50){
+                    this.countSmile = -1;
+                    this.horse.frame = 0;
+                }
+            }
+            // Fishes
+            this.fishes.x += 0.3;
+            if(this.fishes.x > 1300){
+                this.fishes.x = -300;
+            }
+
+            // Mollusk
+
             // guardamos las coordenadas donde se encuentra nuestro mouse
             var pointX = game.input.x;
             var pointY = game.input.y;
