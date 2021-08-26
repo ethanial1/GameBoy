@@ -22,6 +22,9 @@ GamePlayManager = {
 
         // Diamantes
         game.load.spritesheet('diamonds', 'assets/images/diamonds.png', 81, 84, 4);
+
+        // Explosión
+        game.load.spritesheet('explo', 'assets/images/explosion.png');
     },
 
     create: function () {
@@ -74,6 +77,36 @@ GamePlayManager = {
             }
 
         }
+
+        // Animaciones con Tweenings
+        this.explo = game.add.sprite(100,100, 'explo');
+        this.explo.tweenScale = game.add.tween(this.explo.scale).to(
+            {
+                x: [0.4, 0.8, 0.4],         // arranca, ir, final
+                y: [0.4, 0.8, 0.4]
+            },
+            600,                            // Duración en milisegundos
+            Phaser.Easing.Exponential.Out,  //
+            false,                          // indicamos false para evitar que arranque automaticamente
+            0,                              // delay
+            0,                              // Cuántas veces se repite
+            false                           // Valla y regrese
+        );
+
+        this.explo.tweenAlpha = game.add.tween(this.explo).to(
+            {
+                alpha: [1, 0.6, 0]
+            },
+            600,
+            Phaser.Easing.Exponential.Out,
+            false,
+            0,
+            0,
+            false
+        );
+
+        this.explo.anchor.setTo(0.5);
+        this.explo.visible = false;
     },
     onTap: function () {
         this.flagFirstMouseDown = true;
@@ -144,9 +177,17 @@ GamePlayManager = {
                 // recuperar el rectángulo del caballo y del diamante, verificar si están colisionando
                 var rectHorse = this.getBoundsHourse();
                 var rectDiamond = this.getBoundsDiamonds(this.diamonds[i]);
-
+                
+                // La colición solo se hace con los diamantes visibles
                 if(this.diamonds[i].visible && this.isRectangleOverlapping(rectHorse, rectDiamond)){
                     this.diamonds[i].visible = false;
+                    this.explo.visible = true; // hacemos visible la explosión
+                    this.explo.x = this.diamonds[i].x; // posicionamos en la misma posición del diamante
+                    this.explo.y = this.diamonds[i].y;
+
+                    // ejecutamos las animaciones
+                    this.explo.tweenScale.start();
+                    this.explo.tweenAlpha.start();
                 }
 
             }
