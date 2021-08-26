@@ -133,6 +133,24 @@ GamePlayManager = {
         this.currentScore = 0;
         //                  x,      y,  texto, style
         this.scoreTxt = game.add.text(game.width / 2, 40, '0', style);
+        this.scoreTxt.anchor.setTo(0.5);
+
+        // Timer
+        this.totalTime = 5;
+        this.timerTxt = game.add.text(1000, 40, this.totalTime+'s', style);
+        this.timerTxt.anchor.setTo(0.5);
+
+        this.timerGameOver = game.time.events.loop(Phaser.Timer.SECOND, function () {
+            if(this.flagFirstMouseDown){
+                this.totalTime--; // restamos 1 cada segundo
+                this.timerTxt.text = this.totalTime+'';
+                if(this.totalTime <= 0){
+                    game.time.events.remove(this.timerGameOver);
+                    this.endGame = true;
+                    this.showFinalMessage('Fin del juego!!');
+                }
+            }
+        }, this);
         
     },
     // se llama cuando atrapamos un diamante
@@ -144,6 +162,7 @@ GamePlayManager = {
 
         if(this.amountDiamondsCaptu >= cantidad_diamantes){
             this.endGame = true;
+            game.time.events.remove(this.timerGameOver);
             this.showFinalMessage('!Ganaste¡');
         }
     },
