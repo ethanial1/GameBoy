@@ -11,6 +11,9 @@ GamePlayManager = {
 
         // Nos ayuda para que una vez iniciado el juego, el caballo no se mueva.
         this.flagFirstMouseDown = false;
+
+        // variable que guarda todos los diamantes que vamos agarrando
+        this.amountDiamondsCaptu = 0;
     },
     // se cargan todos los recursos que necesitamos para el proyecto, una vez cargados se llama al método create
     preload: function () {
@@ -134,6 +137,29 @@ GamePlayManager = {
     incrementCurrentScore: function () {
         this.currentScore += 100;
         this.scoreTxt.text = this.currentScore; // actualizamos el texto con el puntaje actual
+        
+        this.amountDiamondsCaptu += 1; // cada que agarramos un diamante sumamos 1
+
+        if(this.amountDiamondsCaptu >= cantidad_diamantes){
+            this.showFinalMessage('!Ganaste¡');
+        }
+    },
+    showFinalMessage: function (msg) {
+        var bgAlpha = game.add.bitmapData(game.width, game.height); 
+        bgAlpha.ctx.fillStyle = '#000000';
+        bgAlpha.ctx.fillRect(0,0, game.width, game.height);
+        
+        var bg = game.add.sprite(0,0, bgAlpha);
+        bg.alpha = 0.5;
+
+        var style = {
+            font: 'bold 60pt Arial',
+            fill: '#ffffff',
+            align: 'center'
+        }
+
+        this.textFieldFinalMessage = game.add.text(game.width / 2, game.height / 2, msg, style);
+        this.textFieldFinalMessage.anchor.setTo(0.5);
     },
     onTap: function () {
         this.flagFirstMouseDown = true;
@@ -212,19 +238,21 @@ GamePlayManager = {
 
                     var explotion = this.explosionGroup.getFirstDead();
 
-                    explotion.reset(this.diamonds[i].x,this.diamonds[i].y); // cuando un elemento está muerto, para activarlo hacemos un reset
-                    //explotion.visible = true;            // hacemos visible la explosión
-                    //explotion.x = this.diamonds[i].x;   // posicionamos en la misma posición del diamante
-                    //explotion.y = this.diamonds[i].y;
+                    if(explotion != null){
+                        explotion.reset(this.diamonds[i].x,this.diamonds[i].y); // cuando un elemento está muerto, para activarlo hacemos un reset
+                        //explotion.visible = true;            // hacemos visible la explosión
+                        //explotion.x = this.diamonds[i].x;   // posicionamos en la misma posición del diamante
+                        //explotion.y = this.diamonds[i].y;
 
-                    // ejecutamos las animaciones
-                    explotion.tweenScale.start();
-                    explotion.tweenAlpha.start();
+                        // ejecutamos las animaciones
+                        explotion.tweenScale.start();
+                        explotion.tweenAlpha.start();
 
-                    // Una vez terminada la animación, destruimos el objeto y vuelve a estar disponible.
-                    explotion.tweenAlpha.onComplete.add(function (currentTarget, currentTween){
-                        currentTarget.kill(); // solo matamos a uno, debido a que basta con eso
-                    }, this);
+                        // Una vez terminada la animación, destruimos el objeto y vuelve a estar disponible.
+                        explotion.tweenAlpha.onComplete.add(function (currentTarget, currentTween){
+                            currentTarget.kill(); // solo matamos a uno, debido a que basta con eso
+                        }, this);
+                    }
                 }
 
             }
